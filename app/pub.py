@@ -1,4 +1,3 @@
-# Main loop for the Raspberry Pi applications
 import json
 import paho.mqtt.client as mqtt
 import time
