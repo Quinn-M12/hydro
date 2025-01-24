@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Interface</title>
+    <style>
+        body {
+            background-color: black;
+            color: white; /* Optional: Change text color to white for better contrast */
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        label {
+            font-size: 1.2em;
+        }
+        button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const socket = io();
+
+            socket.on('sensor_data', (data) => {
+                document.getElementById('temp').innerText = data.temp + ' °C';
+                document.getElementById('tds').innerText = data.tds + ' ppm';
+                document.getElementById('ph').innerText = data.ph;
+            });
+
+            socket.emit('request_initial_data');
+        });
+    </script>
+</head>
+<body>
+    <h1>Control Interface</h1>
+    <form action="{{ url_for('update') }}" method="post">
+        <label for="MainFlowON">Main Flow ON:</label>
+        <input type="checkbox" id="MainFlowON" name="MainFlowON" value="1" {% if state.MainFlowON %}checked{% endif %}><br>
+
+        <label for="AuxFlowON">Aux Flow ON:</label>
+        <input type="checkbox" id="AuxFlowON" name="AuxFlowON" value="1" {% if state.AuxFlowON %}checked{% endif %}><br>
+
+        <label for="manual_control">Manual Control:</label>
+        <input type="checkbox" id="manual_control" name="manual_control" {% if state.manual_control %}checked{% endif %}><br>
+
+        <h3>Lights</h3>
+        {% for i in range(4) %}
+            <label for="light{{ i }}">Light {{ i }}:</label>
+            <input type="checkbox" id="light{{ i }}" name="light{{ i }}" value="1" {% if state.lights[i] %}checked{% endif %}><br>
+        {% endfor %}
+
+        <h3>Dosing</h3>
+        {% for i in range(4) %}
+            <label for="dosing{{ i }}">Dosing {{ i }}:</label>
+            <input type="checkbox" id="dosing{{ i }}" name="dosing{{ i }}" value="1" {% if state.dosing[i] %}checked{% endif %}><br>
+        {% endfor %}
+
+        <h3>Sensors</h3>
+
+        <label>Temperature: <span id="temp">{{ state.temp }} °C</span></label><br>
+        <label>TDS: <span id="tds">{{ state.tds }} ppm</span></label><br>
+        <label>pH: <span id="ph">{{ state.ph }}</span></label><br>
+
+        <h3></h3>
+
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>
